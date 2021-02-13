@@ -1,10 +1,9 @@
 const useragent = require("./myPhone").useragent;
 let AES = require("./PAES");
-
 /**
  * @param {String} url request url absolute path
  */
-let getOpenPlatLine = (url) => {
+let getOpenPlatLine = (url, cnf = { base: "" }) => {
   return async (axios, options) => {
     let searchParams = {};
     let result = await axios
@@ -40,12 +39,20 @@ let getOpenPlatLine = (url) => {
       throw new Error("ecs_token缺失");
     }
     ecs_token = ecs_token.value;
-    let jfid = cookiesJson.cookies.find((i) => i.key == "_jf_id");
-    if (!jfid) {
-      throw new Error("jfid缺失");
+    let jfid;
+    switch (cnf.base) {
+      case "msmds":
+        console.log("🐱‍🏍 msmds游戏调度");
+        return { ecs_token, searchParams, jar1 };
+      default:
+        console.log("🐱‍🏍 平台游戏调度");
+        jfid = cookiesJson.cookies.find((i) => i.key == "_jf_id");
+        if (!jfid) {
+          throw new Error("jfid缺失");
+        }
+        jfid = jfid.value;
+        return { jfid, searchParams, jar1 };
     }
-    jfid = jfid.value;
-    return { jfid, searchParams, jar1 };
   };
 };
 
@@ -155,6 +162,46 @@ let lookVideoDoubleResult = (title) => {
     }
   };
 };
+let lookVideoDouble = (params1, params2, title) => {
+  console.log(`😒 ${title}游玩开始翻倍`);
+  return async (axios, options) => {
+    params1["sign"] = AES.sign([
+      params1.arguments1,
+      params1.arguments2,
+      params1.arguments3,
+      params1.arguments4,
+    ]);
+    let { num, jar } = await require("../taskcallback").query(axios, {
+      ...options,
+      params: params1,
+    });
+
+    if (!num) {
+      console.log(`签到小游戏${title}: 今日已完成`);
+      return;
+    }
+
+    do {
+      console.log("🎞 看视频第", num, "次");
+      params2["sign"] = AES.sign([
+        params2.arguments1,
+        params2.arguments2,
+        params2.arguments3,
+        params2.arguments4,
+      ]);
+      await require("../taskcallback").doTask(axios, {
+        ...options,
+        params: params2,
+        jar,
+      });
+      if (num) {
+        console.log("等待15秒再继续");
+        // eslint-disable-next-line no-unused-vars
+        await new Promise((resolve, reject) => setTimeout(resolve, 15 * 1000));
+      }
+    } while (--num);
+  };
+};
 
 /**
  *
@@ -184,4 +231,5 @@ module.exports = {
   postFreeLogin,
   lookVideoDoubleResult,
   encodeParams,
+  lookVideoDouble,
 };
