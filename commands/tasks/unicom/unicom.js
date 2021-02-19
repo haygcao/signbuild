@@ -425,7 +425,9 @@ var start = async (params) => {
     taskOption
   );
 
+
   //首页-小说-任意一本小说内页章节中间 [看书里面的5个视频]
+
   await scheduler.regTask(
     "book5video",
     async (request) => {
@@ -442,6 +444,7 @@ var start = async (params) => {
     },
     taskOption
   );
+
 
   // 积分商城-积分猜拳-猜拳二号
   await scheduler.regTask(
@@ -461,6 +464,7 @@ var start = async (params) => {
     },
     taskOption
   );
+
 };
 module.exports = {
   start,

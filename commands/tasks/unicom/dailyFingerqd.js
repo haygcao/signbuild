@@ -6,7 +6,9 @@ const {
 let crypto = require("crypto");
 const gameEvents = require("./handlers/dailyEvent");
 const AES = require("./handlers/PAES");
+
 const { exit } = require("process");
+
 let dailyFingerqd = {
   doTask: async (axios, options) => {
     console.log("😒 猜拳拿奖...开始");
@@ -20,6 +22,7 @@ let dailyFingerqd = {
       "Ac-yc0001,Ac-yc0002,Ac-yc0003",
       cookies,
       (data) => {
+
         let temp = [
           {
             activityId: "Ac-yc0002",
@@ -73,15 +76,19 @@ let dailyFingerqd = {
           Authorization: data.data.token.access_token,
           // roundGame: data.data.roundGame,
           activity: activity,
+
         };
       }
     );
     await dailyFingerqd.playGames(axios, options, cookies, times);
+
+
   },
   playGames: async (
     axios,
     options,
     { ecs_token, searchParams, jar1 },
+
     { Authorization, activity }
   ) => {
     let request = new UnicomComponent(axios, options, "猜拳拿奖");
@@ -238,6 +245,7 @@ let dailyFingerqd = {
         }
       } while (freeTimes || advertTimes);
     }
+
   },
   lookVideoDouble: async (axios, options) => {
     let params = {
